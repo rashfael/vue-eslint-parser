@@ -497,7 +497,7 @@ export class IntermediateTokenizer {
             range: [token.range[0], token.range[1]],
             loc: { start: token.loc.start, end: token.loc.end },
             name: token.value,
-            rawName: this.text.slice(token.range[0] + 1, token.range[1]),
+            rawName: this.text.slice(token.range[0], token.range[1]), // + 1 breaks pug tags
             selfClosing: false,
             attributes: [],
         }

@@ -19,7 +19,12 @@
     "espree": "^9.0.0",
     "esquery": "^1.4.0",
     "lodash": "^4.17.21",
-    "semver": "^7.3.5"
+    "pug-error": "^2.0.0",
+    "pug-lexer": "^5.0.1",
+    "pug-parser": "^6.0.0",
+    "pug-walk": "^2.0.0",
+    "semver": "^7.3.5",
+    "token-stream": "^1.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
@@ -69,7 +74,7 @@
     "codecov": "codecov",
     "coverage": "opener ./coverage/lcov-report/index.html",
     "lint": "eslint src test package.json --ext .js,.ts",
-    "setup": "git submodule update --init && cd test/fixtures/eslint && npm install",
+    "setup": "git submodule update --init && cd test/fixtures/eslint && npm install --legacy-peer-deps",
     "pretest": "run-s build lint",
     "test": "npm run -s test:mocha",
     "test:mocha": "nyc mocha \"test/*.js\" --reporter dot --timeout 60000",

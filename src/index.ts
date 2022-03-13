@@ -7,6 +7,7 @@ import * as path from "path"
 import * as AST from "./ast"
 import { LocationCalculatorForHtml } from "./common/location-calculator"
 import { HTMLParser, HTMLTokenizer } from "./html"
+import { PugTokenizer } from "./pug"
 import { parseScript, parseScriptElement } from "./script"
 import * as services from "./parser-services"
 import type { ParserOptions } from "./common/parser-options"
@@ -22,6 +23,10 @@ import {
     isStyleElement,
     isTemplateElement,
 } from "./common/ast-utils"
+import {
+    replaceTokens,
+} from "./common/token-utils"
+
 import { parseStyleElements } from "./style"
 
 const STARTS_WITH_LT = /^\s*</u
@@ -102,10 +107,32 @@ export function parseForESLint(
             comments: rootAST.comments,
             errors: rootAST.errors,
         }
-        const templateBody =
-            template != null && templateLang === "html"
-                ? Object.assign(template, concreteInfo)
-                : undefined
+        let templateBody: any
+        if (template != null) {
+            if (templateLang === "html") {
+                templateBody = Object.assign(template, concreteInfo)
+            } else {
+                //  if (templateLang === "pug")
+                // const pugTokenIndex = template.children.findIndex(
+                //     (e) => e.type === "VText",
+                // )
+                const pugNode = template.children.find(
+                    (e) => e.type === "VText",
+                ) as AST.VText
+                const pugTokenizer = new PugTokenizer(pugNode, code)
+                const pugAST = new HTMLParser(
+                    pugTokenizer,
+                    optionsForTemplate,
+                ).parse()
+                // template.children.splice(pugTokenIndex, 1, pugAST.tokens)
+                rootAST.comments.push(...pugAST.comments)
+                rootAST.errors.push(...pugAST.errors)
+                template.children = pugAST.children
+                templateBody = Object.assign(template, concreteInfo)
+                replaceTokens(rootAST, pugNode, pugAST.tokens)
+                // console.log("ROOT AST", Object.keys(pugAST), JSON.stringify(rootAST.tokens, null, 2))
+            }
+        }
 
         const scriptParser = getScriptParser(options.parser, () =>
             getParserLangFromSFC(rootAST),
@@ -153,6 +180,7 @@ export function parseForESLint(
                 }),
             })
         }
+        // console.log('RESULT', Object.keys(templateBody), JSON.stringify(templateBody.children, null, 2))
 
         result.ast.templateBody = templateBody
         document = rootAST
@@ -164,7 +192,6 @@ export function parseForESLint(
             parserOptions: options,
         }),
     )
-
     return result
 }
 

@@ -444,7 +444,7 @@ export class Parser {
     private processAttribute(node: VAttribute, namespace: Namespace): void {
         const tagName = this.getTagName(node.parent.parent)
         const attrName = this.getTagName(node.key)
-
+        console.log(this.expressionEnabled, attrName, DIRECTIVE_NAME.test(attrName))
         if (
             (this.expressionEnabled ||
                 (attrName === "v-pre" && !this.isInVPreElement)) &&
